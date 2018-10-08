@@ -17,14 +17,14 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "relaycomm");
   ros::NodeHandle n;
-  ros::Rate loop_rate(5);
+  ros::Rate loop_rate(2);
 
   // The serial setup is mostly inspired by this:
   // https://stackoverflow.com/questions/38533480/c-libserial-serial-connection-to-arduino
   // Which sets things like parity, stop byte, length, etc.
 
   // This sets up the serial communication to the arduino driver.
-    fileDescriptor = open("/dev/ttyACM1", O_RDWR | O_NOCTTY); //open link to arudino
+    fileDescriptor = open("/dev/ttyACM0", O_RDWR | O_NOCTTY); //open link to arudino
 
 
     struct termios newtio;
@@ -55,9 +55,16 @@ int main(int argc, char **argv)
         return -99;
     }
 
-    while(ros::ok()){
+    long x = 0;
 
-	write(fileDescriptor, serialData , 6*sizeof(char));
+    while(ros::ok()){
+	
+	//ROS_INFO("Setting relays...");
+
+	x = write(fileDescriptor, serialData , 6*sizeof(char));
+
+	//ROS_INFO("Setting relays, sent %d bytes.", x);
+	//ROS_INFO("%d %d %d %d %d %d", serialData[0],serialData[1],serialData[2],serialData[3],serialData[4],serialData[5]);
 
     	ros::spinOnce();
     	loop_rate.sleep();

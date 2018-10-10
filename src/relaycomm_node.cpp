@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "geometry_msgs/Twist.h"
+#include "std_msgs/Int8MultiArray.h"
 
 #include <string>
 
@@ -8,10 +8,18 @@
 #include <time.h>   // time calls
 
 #define BAUDRATE B9600
-
+#define SUB_CHANEL "relay_controll"
 int fileDescriptor;
 
 unsigned char serialData[] = {250, 1, 1, 1, 0, 251};
+
+void relayCallback(const std_msgs::Int8MultiArray::ConstPtr& array)
+{
+		serialData[1] = array->data[0];
+		serialData[2] = array->data[1];
+		serialData[3] = array->data[2];
+		serialData[4] = array->data[3];
+}
 
 int main(int argc, char **argv)
 {
@@ -19,6 +27,7 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   ros::Rate loop_rate(2);
 
+  ros::Subscriber relay = n.subscribe<std_msgs::Int8MultiArray>(SUB_CHANEL, 10, relayCallback);	
   // The serial setup is mostly inspired by this:
   // https://stackoverflow.com/questions/38533480/c-libserial-serial-connection-to-arduino
   // Which sets things like parity, stop byte, length, etc.
